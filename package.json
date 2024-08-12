@@ -1,0 +1,63 @@
+{
+    "name": "express-gql-starter",
+    "version": "1.0.0",
+    "license": "MIT",
+    "main": "src/server.ts",
+    "scripts": {
+        "start": "node dist/server.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+        "build": "tsc",
+        "lint:check": "eslint --ignore-path .eslintignore --ext .js,.ts .",
+        "lint:fix": "eslint . --fix",
+        "prettier:check": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
+        "prettier:fix": "prettier --write .",
+        "lint-prettier": "yarn lint:check && yarn prettier:check",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "migration:generate": "npx typeorm-ts-node-commonjs migration:generate ./src/db/migrations/default -d ./src/db/dataSource.ts",
+        "migration:run": "npx typeorm-ts-node-commonjs migration:run -d ./src/db/dataSource.ts",
+        "migration:revert": "npx typeorm-ts-node-commonjs migration:revert -d ./src/db/dataSource.ts",
+        "migrate:run": "yarn migration:generate && yarn migration:run"
+    },
+    "author": "Mahiuddin Habib",
+    "lint-staged": {
+        "src/**/*.ts": "yarn lint-prettier"
+    },
+    "dependencies": {
+        "@apollo/server": "^4.11.0",
+        "@graphql-tools/merge": "^9.0.5",
+        "bcrypt": "^5.1.1",
+        "cloudinary": "^2.4.0",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "graphql": "^16.9.0",
+        "http-status": "^1.7.4",
+        "jsonwebtoken": "^9.0.2",
+        "multer": "^1.4.5-lts.1",
+        "pg": "^8.12.0",
+        "reflect-metadata": "^0.2.2",
+        "streamifier": "^0.1.1",
+        "typeorm": "^0.3.20",
+        "zod": "^3.23.8"
+    },
+    "devDependencies": {
+        "@types/bcrypt": "^5.0.2",
+        "@types/cookie-parser": "^1.4.7",
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/jsonwebtoken": "^9.0.6",
+        "@types/multer": "^1.4.11",
+        "@types/node": "^22.0.2",
+        "@types/streamifier": "^0.1.2",
+        "@typescript-eslint/eslint-plugin": "^8.0.0",
+        "@typescript-eslint/parser": "^8.0.0",
+        "eslint": "^9.8.0",
+        "eslint-config-prettier": "^9.1.0",
+        "husky": "^9.1.4",
+        "lint-staged": "^15.2.7",
+        "prettier": "^3.3.3",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.5.4"
+    }
+}
