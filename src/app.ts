@@ -24,7 +24,14 @@ app.use(express.urlencoded({ extended: true }));
 (async () => {
     try {
         await apolloServer.start();
-        app.use('/graphql', expressMiddleware(apolloServer));
+        app.use(
+            '/graphql',
+            expressMiddleware(apolloServer, {
+                context: async ({ req, res }) => {
+                    return { req, res };
+                },
+            }),
+        );
     } catch (err) {
         console.error('Error starting Apollo Server:', err);
     }
