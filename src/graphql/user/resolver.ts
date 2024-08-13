@@ -1,5 +1,7 @@
+import { GraphQLError } from 'graphql';
 import appDataSource from '../../db/dataSource';
 import { User } from '../../db/entities/User';
+import { throwGraphQLError } from '../../errors/throwGraphQLError';
 
 const userRepository = appDataSource.getRepository(User);
 
@@ -27,7 +29,7 @@ export const UserResolver = {
             const user = await userRepository.findOneBy({ id });
 
             if (!user) {
-                throw new Error('User not found');
+                throwGraphQLError('User not found', 'USER_NOT_FOUND');
             }
 
             await userRepository.update({ id }, input);

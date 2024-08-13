@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { expressMiddleware } from '@apollo/server/express4';
 import apolloServer from './graphql';
+import { globalErrorHandler } from './middleware/globalErrorHandler';
 
 dotenv.config();
 
@@ -20,8 +21,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Apollo Server setup
-(async () => {
+app.get('/', (req: Request, res: Response, next: NextFunction) => {
+    res.json({ message: 'Hello World!' });
+});
+
+const startServer = async () => {
     try {
         await apolloServer.start();
         app.use(
@@ -32,15 +36,26 @@ app.use(express.urlencoded({ extended: true }));
                 },
             }),
         );
-    } catch (err) {
-        console.error('Error starting Apollo Server:', err);
-    }
-})();
 
-// Global error handler
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(err);
-    res.status(500).send('Something broke!');
-});
+        // Global error handler
+        app.use(globalErrorHandler);
+
+        // Handle 404 errors
+        app.use((req: Request, res: Response, next: NextFunction) => {
+            res.status(404).json({
+                message: 'API Not Found',
+                error:
+                    process.env.NODE_ENV === 'development'
+                        ? `Cannot ${req.method} ${req.url}`
+                        : undefined,
+            });
+        });
+
+    } catch (error) {
+        console.error('Error starting Apollo Server:', error);
+    }
+};
+
+startServer();
 
 export default app;
