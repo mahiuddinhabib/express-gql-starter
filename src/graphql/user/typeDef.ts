@@ -1,36 +1,37 @@
 export const UserTypeDef = `#graphql
     type Query {
-        users: [User]
-        user(id: ID!): User
+        login(input: LoginInput!): AuthPayload
     }
 
     type Mutation {
-        createUser(input: CreateUserInput!): User
-        updateUser(id: ID!, input: UpdateUserInput!): User
-        deleteUser(id: ID!): User
+        register(input: RegisterInput!): AuthPayload
     }
 
     type User {
-        id: ID
-        name: String
-        email: String
-        role: UserRole
-        createdAt: String
-        updatedAt: String
+        id: ID!
+        email: String!
+        role: UserRole!
+        createdAt: String!
+        updatedAt: String!
+        profile: Profile
+        readingLists: [ReadingList]!
     }
 
-    input CreateUserInput {
-        name: String!
+    input LoginInput {
         email: String!
         password: String!
-        role: UserRole
     }
 
-    input UpdateUserInput {
-        name: String
-        email: String
-        password: String
-        role: UserRole
+    input RegisterInput {
+        fullName: String!
+        email: String!
+        password: String!
+        role: String
+    }
+        
+    type AuthPayload {
+        accessToken: String
+        user: User
     }
 
     enum UserRole {

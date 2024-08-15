@@ -3,10 +3,11 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { expressMiddleware } from '@apollo/server/express4';
-import apolloServer from './graphql';
+import apolloServer, { CustomContext } from './graphql';
 import { globalErrorHandler } from './middleware/globalErrorHandler';
-
-dotenv.config();
+import { jwtHelpers } from './helpers/jwtHelpers';
+import config from './config';
+import { JwtPayload, Secret } from 'jsonwebtoken';
 
 const app: Application = express();
 
@@ -32,7 +33,17 @@ const startServer = async () => {
             '/graphql',
             expressMiddleware(apolloServer, {
                 context: async ({ req, res }) => {
-                    return { req, res };
+                    const accessToken = req.headers.authorization;
+
+                    let userInfo: JwtPayload | null = null;
+                    if (accessToken) {
+                        userInfo = await jwtHelpers.verifyToken(
+                            accessToken,
+                            config.jwt.secret as Secret,
+                        );
+                    }
+
+                    return { req, res, userInfo };
                 },
             }),
         );
@@ -50,7 +61,6 @@ const startServer = async () => {
                         : undefined,
             });
         });
-
     } catch (error) {
         console.error('Error starting Apollo Server:', error);
     }
