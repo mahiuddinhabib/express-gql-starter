@@ -49,9 +49,4 @@ export class User extends CommonEntity {
             this.password = await hashingHelper.encrypt_password(this.password);
         }
     }
-
-    async matchPassword(password: string): Promise<boolean> {
-        console.log(password, this.password);
-        return await hashingHelper.match_password(password, this.password);
-    }
 }

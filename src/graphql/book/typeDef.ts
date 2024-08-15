@@ -1,7 +1,14 @@
 export const BookTypeDef = `#graphql
     type Query {
         book(id: ID!): Book
-        books: [Book]
+        books(
+            page: Int = 1, 
+            limit: Int = 10, 
+            sortBy: String = "title", 
+            sortOrder: String = "ASC"
+            search: String,
+            filter: BookFilterInput
+        ): PaginatedBooks
     }
 
     type Mutation {
@@ -20,6 +27,14 @@ export const BookTypeDef = `#graphql
         updatedAt: String!
     }
 
+    type PaginatedBooks {
+        page: Int
+        limit: Int
+        total: Int
+        totalPages: Int
+        books: [Book]
+    }
+
     input CreateBookInput {
         title: String!
         author: String!
@@ -28,6 +43,11 @@ export const BookTypeDef = `#graphql
 
     input UpdateBookInput {
         title: String
+        author: String
+        publishedDate: String
+    }
+
+    input BookFilterInput {
         author: String
         publishedDate: String
     }

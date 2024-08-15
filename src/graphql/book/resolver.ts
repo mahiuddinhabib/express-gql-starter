@@ -18,8 +18,63 @@ export const BookResolver = {
         ) => {
             return await bookRepository.findOneBy({ id });
         },
-        books: async () => {
-            return await bookRepository.find();
+        books: async (
+            _: any,
+            {
+                page = 1,
+                limit = 10,
+                sortBy = 'title',
+                sortOrder = 'ASC',
+                search,
+                filter,
+            }: {
+                page: number;
+                limit: number;
+                sortBy: string;
+                sortOrder: 'ASC' | 'DESC';
+                search?: string;
+                filter?: { author?: string; publishedDate?: string };
+            },
+        ) => {
+            const query = bookRepository.createQueryBuilder('book');
+
+            if (search) {
+                query.andWhere(
+                    'book.title LIKE :search OR book.author LIKE :search',
+                    { search: `%${search}%` },
+                );
+            }
+
+            if (filter) {
+                if (filter.author) {
+                    query.andWhere('book.author = :author', {
+                        author: filter.author,
+                    });
+                }
+                if (filter.publishedDate) {
+                    query.andWhere('book.publishedDate = :publishedDate', {
+                        publishedDate: filter.publishedDate,
+                    });
+                }
+            }
+
+            query
+                .orderBy(
+                    `book.${sortBy}`,
+                    sortOrder,
+                )
+                .skip((page - 1) * limit)
+                .take(limit);
+
+            const [books, total] = await query.getManyAndCount();
+
+            return {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                books,
+            };
         },
     },
     Mutation: {
@@ -38,8 +93,6 @@ export const BookResolver = {
                     'FORBIDDEN',
                 );
             }
-
-            console.log(input);
 
             const createdBook = await bookRepository.save(new Book(input));
 
