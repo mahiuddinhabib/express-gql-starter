@@ -33,9 +33,4 @@ export const UserTypeDef = `#graphql
         accessToken: String
         user: User
     }
-
-    enum UserRole {
-        librarian
-        user
-    }
 `;

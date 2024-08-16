@@ -10,7 +10,9 @@ export class Book extends CommonEntity {
     @Column()
     author: string;
 
-    @Column()
+    @Column({
+        type: 'timestamp with time zone',
+    })
     publishedDate: Date;
 
     @ManyToMany(() => ReadingList, readingList => readingList.books)

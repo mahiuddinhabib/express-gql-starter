@@ -49,6 +49,6 @@ export const BookTypeDef = `#graphql
 
     input BookFilterInput {
         author: String
-        publishedDate: String
+        publishedDate: rangeInput
     }
 `;

@@ -3,6 +3,8 @@ import appDataSource from '../../db/dataSource';
 import { Book } from '../../db/entities/Book';
 import { USER_ROLE } from '../../enums/user';
 import gqlError from '../../errors/throwGraphQLError';
+import { bookFilterableFields, bookSearchableFields } from './constant';
+import { IBookFilter } from './interface';
 
 const bookRepository = appDataSource.getRepository(Book);
 
@@ -33,36 +35,57 @@ export const BookResolver = {
                 sortBy: string;
                 sortOrder: 'ASC' | 'DESC';
                 search?: string;
-                filter?: { author?: string; publishedDate?: string };
+                filter?: IBookFilter;
             },
         ) => {
             const query = bookRepository.createQueryBuilder('book');
 
+            // Searching
             if (search) {
-                query.andWhere(
-                    'book.title LIKE :search OR book.author LIKE :search',
-                    { search: `%${search}%` },
-                );
+                bookSearchableFields.forEach((field, index) => {
+                    if (index === 0) {
+                        query.where(`book.${field} ILIKE :search`, {
+                            search: `%${search}%`,
+                        });
+                    } else {
+                        query.orWhere(`book.${field} ILIKE :search`, {
+                            search: `%${search}%`,
+                        });
+                    }
+                });
             }
 
+            // Filtering
             if (filter) {
-                if (filter.author) {
-                    query.andWhere('book.author = :author', {
-                        author: filter.author,
-                    });
-                }
-                if (filter.publishedDate) {
-                    query.andWhere('book.publishedDate = :publishedDate', {
-                        publishedDate: filter.publishedDate,
-                    });
-                }
+                bookFilterableFields.forEach(field => {
+                    if (filter[field]) {
+                        if (field === 'publishedDate') {
+                            const { gte, lte } = filter[field];
+                            if (gte && lte) {
+                                query.andWhere(
+                                    `book.publishedDate BETWEEN :gte AND :lte`,
+                                    { gte, lte },
+                                );
+                            } else if (gte) {
+                                query.andWhere(`book.publishedDate >= :gte`, {
+                                    gte,
+                                });
+                            } else if (lte) {
+                                query.andWhere(`book.publishedDate <= :lte`, {
+                                    lte,
+                                });
+                            }
+                        } else {
+                            query.andWhere(`book.${field} = :${field}`, {
+                                [field]: filter[field],
+                            });
+                        }
+                    }
+                });
             }
 
             query
-                .orderBy(
-                    `book.${sortBy}`,
-                    sortOrder,
-                )
+                .orderBy(`book.${sortBy}`, sortOrder)
                 .skip((page - 1) * limit)
                 .take(limit);
 

@@ -9,6 +9,17 @@ import { JwtPayload } from 'jsonwebtoken';
 import { ReadingList } from './readingList';
 
 const typeDefs = mergeTypeDefs([
+    `#graphql
+    enum UserRole {
+        librarian
+        user
+    }
+
+    input rangeInput {
+        gte: String
+        lte: String
+    }
+    `,
     User.typeDef,
     Profile.typeDef,
     Book.typeDef,
