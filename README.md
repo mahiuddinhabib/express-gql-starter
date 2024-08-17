@@ -110,7 +110,7 @@ This project is a **Library Management App** built using **Express** and **Graph
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/library-management-app.git
+git clone https://github.com/mahiuddinhabib/express-gql-starter.git
 cd library-management-app
 ```
 
