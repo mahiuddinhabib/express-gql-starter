@@ -1,12 +1,7 @@
-import { JwtPayload } from 'jsonwebtoken';
-import appDataSource from '../../db/dataSource';
 import { Profile } from '../../db/entities/Profile';
 import gqlError from '../../errors/throwGraphQLError';
 import { CustomContext } from '..';
-import config from '../../config';
-import generateUploadURL from '../../utils/generateS3SignedUrl';
-
-const profileRepository = appDataSource.getRepository(Profile);
+import { profileService } from './service';
 
 export const ProfileResolver = {
     Query: {
@@ -14,15 +9,8 @@ export const ProfileResolver = {
             if (!userInfo) {
                 throw new gqlError('You are not authorized', 'UNAUTHORIZED');
             }
-            const profile = await profileRepository.findOne({
-                where: { user: { id: userInfo.id } },
-            });
 
-            if (!profile) {
-                throw new gqlError('Profile not found', 'NOT_FOUND');
-            }
-
-            return profile;
+            return await profileService.getProfile(userInfo);
         },
     },
     Mutation: {
@@ -35,26 +23,9 @@ export const ProfileResolver = {
                 throw new gqlError('You are not authorized', 'UNAUTHORIZED');
             }
 
-            const profile = await profileRepository.findOne({
-                where: {
-                    user: {
-                        id: userInfo.id,
-                    },
-                },
-            });
-
-            if (!profile) {
-                throw new gqlError('Profile not found', 'NOT_FOUND');
-            }
-
-            await profileRepository.update(profile.id, input);
-
-            return await profileRepository.findOne({
-                where: {
-                    id: profile.id,
-                },
-            });
+            return await profileService.updateProfile(input, userInfo);
         },
+
         getS3SignedUrl: async (
             _: any,
             { fileType }: { fileType: string },
@@ -64,13 +35,7 @@ export const ProfileResolver = {
                 throw new gqlError('You are not authorized', 'UNAUTHORIZED');
             }
 
-            const fileName = `${userInfo.id}`;
-            const signedUrl = await generateUploadURL(fileName, fileType);
-
-            return {
-                url: `https://${config.aws.bucketName}.s3.amazonaws.com/${fileName}`,
-                signedRequest: signedUrl,
-            };
+            return await profileService.getS3SignedUrl(fileType, userInfo);
         },
     },
 };

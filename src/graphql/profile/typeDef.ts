@@ -28,6 +28,6 @@ export const ProfileTypeDef = `#graphql
 
     type S3SignedUrl {
         url: String!
-        signedRequest: String!
+        signedUrl: String!
     }
 `;

@@ -1,12 +1,9 @@
 import { CustomContext } from '..';
-import appDataSource from '../../db/dataSource';
 import { Book } from '../../db/entities/Book';
 import { USER_ROLE } from '../../enums/user';
 import gqlError from '../../errors/throwGraphQLError';
-import { bookFilterableFields, bookSearchableFields } from './constant';
 import { IBookFilter } from './interface';
-
-const bookRepository = appDataSource.getRepository(Book);
+import { bookService } from './service';
 
 export const BookResolver = {
     Query: {
@@ -18,8 +15,9 @@ export const BookResolver = {
                 id: string;
             },
         ) => {
-            return await bookRepository.findOneBy({ id });
+            return await bookService.getSingleBook(id);
         },
+
         books: async (
             _: any,
             {
@@ -38,68 +36,17 @@ export const BookResolver = {
                 filter?: IBookFilter;
             },
         ) => {
-            const query = bookRepository.createQueryBuilder('book');
-
-            // Searching
-            if (search) {
-                bookSearchableFields.forEach((field, index) => {
-                    if (index === 0) {
-                        query.where(`book.${field} ILIKE :search`, {
-                            search: `%${search}%`,
-                        });
-                    } else {
-                        query.orWhere(`book.${field} ILIKE :search`, {
-                            search: `%${search}%`,
-                        });
-                    }
-                });
-            }
-
-            // Filtering
-            if (filter) {
-                bookFilterableFields.forEach(field => {
-                    if (filter[field]) {
-                        if (field === 'publishedDate') {
-                            const { gte, lte } = filter[field];
-                            if (gte && lte) {
-                                query.andWhere(
-                                    `book.publishedDate BETWEEN :gte AND :lte`,
-                                    { gte, lte },
-                                );
-                            } else if (gte) {
-                                query.andWhere(`book.publishedDate >= :gte`, {
-                                    gte,
-                                });
-                            } else if (lte) {
-                                query.andWhere(`book.publishedDate <= :lte`, {
-                                    lte,
-                                });
-                            }
-                        } else {
-                            query.andWhere(`book.${field} = :${field}`, {
-                                [field]: filter[field],
-                            });
-                        }
-                    }
-                });
-            }
-
-            query
-                .orderBy(`book.${sortBy}`, sortOrder)
-                .skip((page - 1) * limit)
-                .take(limit);
-
-            const [books, total] = await query.getManyAndCount();
-
-            return {
+            return await bookService.getAllBooks(
                 page,
                 limit,
-                total,
-                totalPages: Math.ceil(total / limit),
-                books,
-            };
+                sortBy,
+                sortOrder,
+                search,
+                filter,
+            );
         },
     },
+
     Mutation: {
         createBook: async (
             _: any,
@@ -117,10 +64,9 @@ export const BookResolver = {
                 );
             }
 
-            const createdBook = await bookRepository.save(new Book(input));
-
-            return createdBook;
+            return await bookService.createBook(input);
         },
+
         updateBook: async (
             _: any,
             {
@@ -139,16 +85,9 @@ export const BookResolver = {
                 );
             }
 
-            const book = await bookRepository.findOneBy({ id });
-
-            if (!book) {
-                throw new gqlError('Book not found', 'NOT_FOUND');
-            }
-
-            await bookRepository.update(id, input);
-
-            return await bookRepository.findOneBy({ id });
+            return await bookService.updateBook(id, input);
         },
+
         deleteBook: async (
             _: any,
             {
@@ -165,15 +104,7 @@ export const BookResolver = {
                 );
             }
 
-            const book = await bookRepository.findOneBy({ id });
-
-            if (!book) {
-                throw new gqlError('Book not found', 'NOT_FOUND');
-            }
-
-            await bookRepository.delete(id);
-
-            return book;
+            return await bookService.deleteBook(id);
         },
     },
 };
