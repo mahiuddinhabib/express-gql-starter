@@ -5,6 +5,7 @@ export const ProfileTypeDef = `#graphql
 
     type Mutation {
         updateProfile(input: UpdateProfileInput!): Profile
+        getS3SignedUrl(fileType: String!): S3SignedUrl
     }
 
     type Profile {
@@ -23,5 +24,10 @@ export const ProfileTypeDef = `#graphql
         phoneNumber: String
         address: String
         profilePhoto: String
+    }
+
+    type S3SignedUrl {
+        url: String!
+        signedRequest: String!
     }
 `;

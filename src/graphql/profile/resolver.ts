@@ -3,6 +3,8 @@ import appDataSource from '../../db/dataSource';
 import { Profile } from '../../db/entities/Profile';
 import gqlError from '../../errors/throwGraphQLError';
 import { CustomContext } from '..';
+import config from '../../config';
+import generateUploadURL from '../../utils/generateS3SignedUrl';
 
 const profileRepository = appDataSource.getRepository(Profile);
 
@@ -52,6 +54,23 @@ export const ProfileResolver = {
                     id: profile.id,
                 },
             });
+        },
+        getS3SignedUrl: async (
+            _: any,
+            { fileType }: { fileType: string },
+            { userInfo }: CustomContext,
+        ) => {
+            if (!userInfo) {
+                throw new gqlError('You are not authorized', 'UNAUTHORIZED');
+            }
+
+            const fileName = `${userInfo.id}`;
+            const signedUrl = await generateUploadURL(fileName, fileType);
+
+            return {
+                url: `https://${config.aws.bucketName}.s3.amazonaws.com/${fileName}`,
+                signedRequest: signedUrl,
+            };
         },
     },
 };
