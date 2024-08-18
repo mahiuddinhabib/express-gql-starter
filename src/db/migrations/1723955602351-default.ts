@@ -1,12 +1,13 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Default1723806703228 implements MigrationInterface {
-    name = 'Default1723806703228'
+export class Default1723955602351 implements MigrationInterface {
+    name = 'Default1723955602351'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "profile" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "fullName" character varying NOT NULL, "phoneNumber" character varying, "address" character varying, "profilePhoto" character varying, "userId" uuid, CONSTRAINT "REL_a24972ebd73b106250713dcddd" UNIQUE ("userId"), CONSTRAINT "PK_3dd8bfc97e4a77c70971591bdcb" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "book" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "title" character varying NOT NULL, "author" character varying NOT NULL, "publishedDate" TIMESTAMP WITH TIME ZONE NOT NULL, CONSTRAINT "PK_a3afef72ec8f80e6e5c310b28a4" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "reading_list" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "title" character varying NOT NULL, "userId" uuid, CONSTRAINT "PK_9e1249ecae88256aa3cf15a6315" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."user_role_enum" AS ENUM('librarian', 'user')`);
         await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "email" character varying NOT NULL, "password" character varying NOT NULL, "role" "public"."user_role_enum" NOT NULL DEFAULT 'user', CONSTRAINT "UQ_e12875dfb3b1d92d7d7c5377e22" UNIQUE ("email"), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "reading_list_books_book" ("readingListId" uuid NOT NULL, "bookId" uuid NOT NULL, CONSTRAINT "PK_1f84b5e73270b7b81583ad45336" PRIMARY KEY ("readingListId", "bookId"))`);
         await queryRunner.query(`CREATE INDEX "IDX_f615cb7866aa0c4aa6b7e5004d" ON "reading_list_books_book" ("readingListId") `);
@@ -26,6 +27,7 @@ export class Default1723806703228 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "public"."IDX_f615cb7866aa0c4aa6b7e5004d"`);
         await queryRunner.query(`DROP TABLE "reading_list_books_book"`);
         await queryRunner.query(`DROP TABLE "user"`);
+        await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
         await queryRunner.query(`DROP TABLE "reading_list"`);
         await queryRunner.query(`DROP TABLE "book"`);
         await queryRunner.query(`DROP TABLE "profile"`);

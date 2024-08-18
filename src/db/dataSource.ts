@@ -4,6 +4,9 @@ import config from '../config';
 const appDataSource = new DataSource({
     type: 'postgres',
     url: config.database_url,
+    ssl: {
+        rejectUnauthorized: false,
+    },
     entities: ['src/db/entities/*.ts'],
     migrations: ['src/db/migrations/*.ts'],
     subscribers: ['src/db/subscribers/*.ts'],

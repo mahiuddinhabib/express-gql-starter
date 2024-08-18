@@ -1,9 +1,8 @@
 import cors from 'cors';
 import express, { Application, Request, Response, NextFunction } from 'express';
-import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { expressMiddleware } from '@apollo/server/express4';
-import apolloServer, { CustomContext } from './graphql';
+import apolloServer from './graphql';
 import { globalErrorHandler } from './middleware/globalErrorHandler';
 import { jwtHelpers } from './helpers/jwtHelpers';
 import config from './config';

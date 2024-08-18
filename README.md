@@ -111,7 +111,7 @@ This project is a **Library Management App** built using **Express** and **Graph
 
 ```bash
 git clone https://github.com/mahiuddinhabib/express-gql-starter.git
-cd express-gql-starte
+cd express-gql-starter
 ```
 
 2. Install the dependencies:
